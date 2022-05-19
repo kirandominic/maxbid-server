@@ -17,12 +17,12 @@ const UserSchema= new mongoose.Schema({
         type : String,
         required:true,
     },
-    district:{
-        type : String,
-    },
-    state:{
-        type : String,
-    },
+    // district:{
+    //     type : String,
+    // },
+    // state:{
+    //     type : String,
+    // },
     email:{
         type : String,
     },
@@ -32,6 +32,9 @@ const UserSchema= new mongoose.Schema({
         maxlength:16,
     },
     id:{
+        type : String
+    },
+    profile:{
         type : String
     },
     status:{

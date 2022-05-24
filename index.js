@@ -30,7 +30,10 @@ const jwt = require('jsonwebtoken')
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-
+const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
+const CLEINT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
 app.use(express.json())
 app.use(cors())
 
@@ -77,21 +80,74 @@ cron.schedule('* * * * * ', async function () {
                     }
                     else{
                     maxBidProduct.forEach(element2=>{
-                        console.log(element2.uid);
-                        console.log(element2.bid);
-                        console.log(element2.date);
+                        // console.log(element2.uid);
+                        // console.log(element2.bid);
+                        // console.log(element2.date);
 
 
                         ProductModel.updateOne({_id:element1._id},
-                            {winner:element2.uid}, function (err) {
+                            {winner:element2.uid}, async function (err) {
                             if (err){
                                 console.log(err)
                 
                             }
                             else{
+                                const user= await UserModel.findOne({_id:element2.uid});
+                                const product= await ProductModel.findOne({_id:element1._id});
+
+
                                 console.log("updated winner user");
+                                const email_message = "<h1>Congratulations<h1><h3> Dear "+user.fname + " you have won the bidding on the product "+ product.pname +" .</br></h3><h3> at amount of "+ product.high_bid +"</h3><h3></br>Thank you "+"</h3>" ;
+                                // console.log(email_message);
+                                 const to_email =user.email;
+                 // These id's and secrets should come from .env file.
+                 
+                 
+                 const oAuth2Client = new google.auth.OAuth2(
+                   CLIENT_ID,
+                   CLEINT_SECRET,
+                   REDIRECT_URI
+                 );
+                 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+                 
+                 async function sendMail() {
+                   try {
+                     const accessToken = await oAuth2Client.getAccessToken();
+                 
+                     const transport = nodemailer.createTransport({
+                       service: 'gmail',
+                       auth: {
+                         type: 'OAuth2',
+                         user: 'kirandom52@gmail.com',
+                         clientId: CLIENT_ID,
+                         clientSecret: CLEINT_SECRET,
+                         refreshToken: REFRESH_TOKEN,
+                         accessToken: accessToken,
+                       },
+                     });
+                 
+                     const mailOptions = {
+                       from: 'KIRAN <kirandom52@gmail.com>',
+                       to: String(to_email),
+                       subject: 'Bill reciept',
+                       text: 'Bill reciept',
+                       html: String(email_message),
+                     };
+                 
+                     const result = await transport.sendMail(mailOptions);
+                     return result;
+                   } catch (error) {
+                     return error;
+                   }
+                 }
+                 
+                 sendMail()
+                   .then((result) => console.log('Email sent...', result))
+                   .catch((error) => console.log(error.message));
+                 
                             }
                         });
+                        
                     });
                 }
                    ProductModel.updateOne({_id:element1._id}, 
@@ -113,6 +169,7 @@ cron.schedule('* * * * * ', async function () {
     //console.log(element1.product_name);
   });
   app.post("/addpayment",async(req,res)=>{
+      console.log(req.body);
     const pid = req.body.pid;
     const uid = req.body.uid;
     const amount = req.body.amount;
@@ -138,22 +195,18 @@ cron.schedule('* * * * * ', async function () {
             if (err){
                
                 console.log(err);
-        res.send({write_status: "fail"});
+                res.send({write_status: "fail"});
 
             }
             else{
-                res.send({write_status: "success",BillId:docs._id});
                 console.log("Ppaymet added");
                 console.log("Updated Docs : ", docs._id);
                 //mail
                 const email_message = "<h1>"+"Bill ID : "+ docs._id + '<h1><h3> Dear '+user.fname + " we have recieved your payment of rupees "+amount+" .</br></h3><h3> your product "+product.pname +" will be promted for "+ days+" days.</h3><h3></br>Thank you "+"</h3>" ;
                // console.log(email_message);
-                const to_email =docs.email;
+                const to_email =user.email;
 // These id's and secrets should come from .env file.
-const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
-const CLEINT_SECRET = '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';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = '1//04wbhg9gFpAgQCgYIARAAGAQSNwF-L9Ir-1F9yr6QjXXOT12lnEqgGiQR-DM2Mku6bApSGe4kYShtGX1mLahtbDC2qUgsz7bBRqk';
+
 
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -198,6 +251,8 @@ sendMail()
   .catch((error) => console.log(error.message));
 
                 //end mail
+                res.send({write_status: "success",BillId:docs._id});
+
             };
         
        
@@ -831,6 +886,7 @@ app.post("/disableProduct",async(req,res)=>{
 })
 //adding product
 app.post("/addproduct",async (req,res)=>{
+    console.log(req.body.category);
     if(!req.files)
     {
      //console.log("no files selected");   
@@ -849,8 +905,8 @@ app.post("/addproduct",async (req,res)=>{
                 }
                 else
                 {
-                   // console.log("inside else");
-
+                    console.log("inside else");
+            console.log(req.body.category);
             const img_name1 = Date.now()+req.body.filename;
             const pname = req.body.pname;
             const bid = req.body.bid;
@@ -859,6 +915,7 @@ app.post("/addproduct",async (req,res)=>{
             const information = req.body.information;
             const email = req.body.email;
             const date1 = new Date();
+            const category = req.body.category;
 date1.setDate(date1.getDate() + days);
             const  newProduct = new ProductModel({
                 pname:pname,
@@ -868,6 +925,7 @@ date1.setDate(date1.getDate() + days);
                 information:information,
                 image:img_name1,
                 email:email,
+                category:category,
 date:date1,
             })
             await newProduct.save(async function (err, docs){

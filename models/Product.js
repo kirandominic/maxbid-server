@@ -53,6 +53,7 @@ const ProductSchema= new mongoose.Schema({
         email:{
             type : String,
         },
+    category:{type:String,},
 });
 
 const ProductModel = mongoose.model("products",ProductSchema)

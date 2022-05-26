@@ -191,13 +191,10 @@ app.post("/addpayment",async(req,res)=>{
             }
             else{
                 console.log("Ppaymet added");
-                console.log("Updated Docs : ", docs._id);
+                //console.log("Updated Docs : ", docs._id);
                 //mail
                 const email_message = "<h1>"+"Bill ID : "+ docs._id + '<h1><h3> Dear '+user.fname + " we have recieved your payment of rupees "+amount+" .</br></h3><h3> your product "+product.pname +" will be promted for "+ days+" days.</h3><h3></br>Thank you "+"</h3>" ;
-               // console.log(email_message);
                 const to_email =user.email;
-// These id's and secrets should come from .env file.
-
 const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
 const CLEINT_SECRET = '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';
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
@@ -701,6 +698,10 @@ app.post('/forgotcheck',async (req,res)=>{
         await UserModel.findOneAndUpdate({email:req.body.email},{otp:val});
         const email_message = "<h1>Your OTP is "+val+"</h1>"
         try{
+            const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
+const CLEINT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
                 const oAuth2Client = new google.auth.OAuth2(
                     CLIENT_ID,
                     CLEINT_SECRET,

@@ -5,7 +5,7 @@ const app = express()
 const mongoose = require('mongoose')
 const UserModel = require("./models/users")
 const BidModel = require("./models/bids")
-
+const RateModel = require("./models/advertisementRate")
 const ReportModel = require("./models/reports")
 const cron = require('node-cron');
 
@@ -698,6 +698,112 @@ res.send({login_status:"fail"});    }
         console.log(err);
     }
 })
+app.post('/forgotcheck',async (req,res)=>{
+
+    console.log(req.body)
+    const user = await UserModel.findOne({ email: req.body.email });
+    if (user) {
+      const val = Math.floor(1000 + Math.random() * 9000);
+        await UserModel.findOneAndUpdate({email:req.body.email},{otp:val});
+        const email_message = "<h1>Your OTP is "+val+"</h1>"
+        try{
+                const oAuth2Client = new google.auth.OAuth2(
+                    CLIENT_ID,
+                    CLEINT_SECRET,
+                    REDIRECT_URI
+                );
+                oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+                
+                async function sendMail() {
+                    try {
+                    const accessToken = await oAuth2Client.getAccessToken();
+                
+                    const transport = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                        type: 'OAuth2',
+                        user: 'kirandom52@gmail.com',
+                        clientId: CLIENT_ID,
+                        clientSecret: CLEINT_SECRET,
+                        refreshToken: REFRESH_TOKEN,
+                        accessToken: accessToken,
+                        },
+                    });
+                
+                    const mailOptions = {
+                        from: 'KIRAN <kirandom52@gmail.com>',
+                        to: String(req.body.email),
+                        subject: 'OTP for Password Reset',
+                        text: 'OTP for Password Reset',
+                        html: String(email_message),
+                    };
+                
+                    const result = await transport.sendMail(mailOptions);
+                    return result;
+                    } catch (error) {
+                    return error;
+                    }
+                }
+                
+                sendMail()
+                    .then((result) => console.log('Email sent...', result))
+                    .catch((error) => console.log(error.message));
+                
+        }
+        catch(error){
+            console.log(error)
+          }
+}
+else{
+
+    res.send({ message: 'Email not Registered' });
+  }
+})
+app.post("/changepassword",async (req,res)=>{
+    console.log(req.body);
+      const email= req.body.email;
+      const password= req.body.password;
+      const  otp = req.body.otp;
+      const user1 = await UserModel.findOne({ email:email });
+      if (user1) {
+          
+        
+        console.log(user1.otp);
+        console.log(otp);
+        if(user1.otp === Number(otp)){
+          // console.log("otp match")
+        await UserModel.findOneAndUpdate({email:email},{password:password});
+        const user= await UserModel.findOne({email:req.body.email,password :req.body.password,})
+        if(user){
+            //console.log(user.fname);
+                   const token = jwt.sign ({
+                name:user.fame,
+                email :req.body.email,
+    
+            },'secret783')
+            if (req.body.email=="admin@maxbid.com")
+            {
+                res.send({login_status: "success" , id: user._id,user: token ,status:"admin",fname : user.fname});
+            }
+            else{
+            console.log(user._id);
+            res.send({login_status: "success" , user: token ,id: user._id,status:user.status,fname : user.fname,profile:user.profile});
+            }
+    
+        
+      }
+      else{
+        console.log("user not ok");
+            res.send({login_status:"fail"});    }
+
+      }
+      else{
+        res.send({ message: 'Invalid OTP' });
+        return;
+      }
+
+}
+})
 //Deleting a user
 app.post("/deleteuser",async(req,res)=>{
     try{
@@ -916,7 +1022,7 @@ app.post("/addproduct",async (req,res)=>{
             const email = req.body.email;
             const date1 = new Date();
             const category = req.body.category;
-date1.setDate(date1.getDate() + days);
+            date1.setDate(date1.getDate() + days);
             const  newProduct = new ProductModel({
                 pname:pname,
                 bid:bid,
@@ -986,6 +1092,54 @@ app.post("/get-user",async (req, res) => {
              res.json(result);
          }
     })
+})
+app.get("/getRate",async(req,res)=>{
+    console.log("getrate called");
+    try{
+ RateModel.find({},function(err,rates)
+ {
+     if(err){
+         console.log(err);
+        // res.send({message:"fail"});
+     }
+     else{
+
+         if(!rates[0]){
+
+         }
+         else{
+
+         
+       //  console.log(rates);
+     res.send({date:rates[0].date,rate:rates[0].rate});
+    }
+    }
+ }).sort({date:-1})
+}
+catch(err){
+    console.log(err);
+}
+ //  console.log(rateobject);
+//    res.send({rate:rateobject});
+    
+})
+app.post("/updateRate",async(req,res)=>{
+    //console.log("rate  "+ req.body.rate)
+    const  newRate = new RateModel({
+        rate:req.body.rate,
+        date : new Date(),
+    })
+    try{
+       await newRate.save();
+      //  console.log("rate updated in server");
+
+        res.send({message:"sucess"});
+        
+     }
+ catch(err){
+     console.log(err);
+     res.send({message:"fail"});
+ }
 })
 const PORT = process.env.PORT || 3001
 app.listen(PORT,()=>{

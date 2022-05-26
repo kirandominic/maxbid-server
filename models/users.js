@@ -40,7 +40,10 @@ const UserSchema= new mongoose.Schema({
     status:{
         type : String,
         default:'un_approved'
-    }
+    },
+    otp:{
+        type:Number,
+    },
 });
 
 const UserModel = mongoose.model("users",UserSchema)

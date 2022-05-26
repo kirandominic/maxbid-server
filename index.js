@@ -8,6 +8,7 @@ const BidModel = require("./models/bids")
 const RateModel = require("./models/advertisementRate")
 const ReportModel = require("./models/reports")
 const cron = require('node-cron');
+const bodyParser = require("body-parser");
 
 const ProductModel = require("./models/Product")
 const PaymentModel = require("./models/Payment")
@@ -41,8 +42,16 @@ const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFG
 
 // mongoose.connect("mongodb+srv://kirandom:Kdmash123@cluster0.553jm.mongodb.net/maxbid?retryWrites=true&w=majority")
 const fileUpload = require('express-fileupload');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json())
-app.use(cors())
 app.use(express.static("files"));
 app.use(fileUpload());
 app.use('/Images/Products', express.static('Images/Products'));

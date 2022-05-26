@@ -34,15 +34,15 @@ const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleuser
 const CLEINT_SECRET = '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';
 const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
 const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
-app.use(express.json())
-app.use(cors())
+
 
 
  
 
 // mongoose.connect("mongodb+srv://kirandom:Kdmash123@cluster0.553jm.mongodb.net/maxbid?retryWrites=true&w=majority")
 const fileUpload = require('express-fileupload');
-
+app.use(express.json())
+app.use(cors())
 app.use(express.static("files"));
 app.use(fileUpload());
 app.use('/Images/Products', express.static('Images/Products'));

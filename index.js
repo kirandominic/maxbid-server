@@ -8,7 +8,6 @@ const BidModel = require("./models/bids")
 const RateModel = require("./models/advertisementRate")
 const ReportModel = require("./models/reports")
 const cron = require('node-cron');
-const bodyParser = require("body-parser");
 
 const ProductModel = require("./models/Product")
 const PaymentModel = require("./models/Payment")
@@ -31,10 +30,7 @@ const jwt = require('jsonwebtoken')
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
-const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
-const CLEINT_SECRET = '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';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
+
 
 
 
@@ -42,16 +38,10 @@ const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFG
 
 // mongoose.connect("mongodb+srv://kirandom:Kdmash123@cluster0.553jm.mongodb.net/maxbid?retryWrites=true&w=majority")
 const fileUpload = require('express-fileupload');
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(
-  cors({
-    origin: true,
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+
 app.use(express.json())
+app.use(cors())
 app.use(express.static("files"));
 app.use(fileUpload());
 app.use('/Images/Products', express.static('Images/Products'));
@@ -110,7 +100,10 @@ cron.schedule('* * * * * ', async function () {
                                 // console.log(email_message);
                                  const to_email =user.email;
                  // These id's and secrets should come from .env file.
-                 
+                 const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
+const CLEINT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
                  
                  const oAuth2Client = new google.auth.OAuth2(
                    CLIENT_ID,
@@ -216,7 +209,10 @@ cron.schedule('* * * * * ', async function () {
                 const to_email =user.email;
 // These id's and secrets should come from .env file.
 
-
+const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
+const CLEINT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLEINT_SECRET,

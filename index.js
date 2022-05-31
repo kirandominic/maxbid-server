@@ -334,9 +334,11 @@ UserModel.find({},  (err,result) =>{
 })
 });
 app.post("/get-bill",async (req,res)=>{
+    console.log("get bill called")
     bid = req.body.bid;
     const bill= await PaymentModel.find({_id:bid});
     const user= await UserModel.find({_id:bill[0].uid});
+    console.log(user) 
        res.json({result:bill,user:user});
 
     });

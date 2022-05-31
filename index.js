@@ -82,12 +82,14 @@ cron.schedule('* * * * * ', async function () {
                             else{
                                 const user= await UserModel.findOne({_id:element2.uid});
                                 const product= await ProductModel.findOne({_id:element1._id});
-
+                                const seller = await UserModel.findOne({email:product.email});
 
                                 console.log("updated winner user");
                                 const email_message = "<h1>Congratulations<h1><h3> Dear "+user.fname + " you have won the bidding on the product "+ product.pname +" .</br></h3><h3> at amount of "+ product.high_bid +"</h3><h3></br>Thank you "+"</h3>" ;
+                                const email_message_seller = "<h1>Congratulations<h1><h3> Dear "+seller.fname + " your product "+ product.pname +" Has sucessfully auctioned .</br></h3><h3> at amount of "+ product.high_bid +"</h3><h3></br> Please contact the buyer through the detiils in the maxbid site.Thank you "+"</h3>" ;
                                 // console.log(email_message);
                                  const to_email =user.email;
+                                 const to_seller_email = product.email;
                  // These id's and secrets should come from .env file.
                     const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
                     const CLEINT_SECRET = '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';
@@ -120,8 +122,8 @@ cron.schedule('* * * * * ', async function () {
                      const mailOptions = {
                        from: 'KIRAN <kirandom52@gmail.com>',
                        to: String(to_email),
-                       subject: 'Bill reciept',
-                       text: 'Bill reciept',
+                       subject: 'MAXBID AUCTION RESULT',
+                       text: 'MAXBID AUCTION RESULT',
                        html: String(email_message),
                      };
                  
@@ -130,9 +132,44 @@ cron.schedule('* * * * * ', async function () {
                    } catch (error) {
                      return error;
                    }
+
                  }
+                 async function sendMailSeller() {
+                    try {
+                      const accessToken = await oAuth2Client.getAccessToken();
+                  
+                      const transport = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                          type: 'OAuth2',
+                          user: 'kirandom52@gmail.com',
+                          clientId: CLIENT_ID,
+                          clientSecret: CLEINT_SECRET,
+                          refreshToken: REFRESH_TOKEN,
+                          accessToken: accessToken,
+                        },
+                      });
+                  
+                      const mailOptions = {
+                        from: 'KIRAN <kirandom52@gmail.com>',
+                        to: String(to_seller_email),
+                        subject: 'MAXBID AUCTION RESULT',
+                        text: 'MAXBID AUCTION RESULT',
+                        html: String(email_message_seller),
+                      };
+                  
+                      const result = await transport.sendMailSeller(mailOptions);
+                      return result;
+                    } catch (error) {
+                      return error;
+                    }
+                    
+                  }
                  
                  sendMail()
+                   .then((result) => console.log('Email sent...', result))
+                   .catch((error) => console.log(error.message));
+                   sendMailSeller()
                    .then((result) => console.log('Email sent...', result))
                    .catch((error) => console.log(error.message));
                  
@@ -195,51 +232,51 @@ app.post("/addpayment",async(req,res)=>{
                 //mail
                 const email_message = "<h1>"+"Bill ID : "+ docs._id + '<h1><h3> Dear '+user.fname + " we have recieved your payment of rupees "+amount+" .</br></h3><h3> your product "+product.pname +" will be promted for "+ days+" days.</h3><h3></br>Thank you "+"</h3>" ;
                 const to_email =user.email;
-const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
-const CLEINT_SECRET = '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';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
-const oAuth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLEINT_SECRET,
-  REDIRECT_URI
-);
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+                const CLIENT_ID = '805190540897-e94v2ssuofsgkk7ep9g75um6pb3m2h55.apps.googleusercontent.com';
+                const CLEINT_SECRET = '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';
+                const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+                const REFRESH_TOKEN = '1//04qIkZt0TF0QHCgYIARAAGAQSNwF-L9Ir_oqQDRkYVYPqsMncNVFFGG159_xLvjJBzNVxTU2ISQ58Vaw8xw5o3jUdTEk4lYTuJkE';
+                const oAuth2Client = new google.auth.OAuth2(
+                CLIENT_ID,
+                CLEINT_SECRET,
+                REDIRECT_URI
+                );
+                oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-async function sendMail() {
-  try {
-    const accessToken = await oAuth2Client.getAccessToken();
+                    async function sendMail() {
+                    try {
+                        const accessToken = await oAuth2Client.getAccessToken();
 
-    const transport = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: 'kirandom52@gmail.com',
-        clientId: CLIENT_ID,
-        clientSecret: CLEINT_SECRET,
-        refreshToken: REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    });
+                        const transport = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            type: 'OAuth2',
+                            user: 'kirandom52@gmail.com',
+                            clientId: CLIENT_ID,
+                            clientSecret: CLEINT_SECRET,
+                            refreshToken: REFRESH_TOKEN,
+                            accessToken: accessToken,
+                        },
+                        });
 
-    const mailOptions = {
-      from: 'KIRAN <kirandom52@gmail.com>',
-      to: String(to_email),
-      subject: 'Bill reciept',
-      text: 'Bill reciept',
-      html: String(email_message),
-    };
+                            const mailOptions = {
+                            from: 'KIRAN <kirandom52@gmail.com>',
+                            to: String(to_email),
+                            subject: 'Bill reciept',
+                            text: 'Bill reciept',
+                            html: String(email_message),
+                            };
 
-    const result = await transport.sendMail(mailOptions);
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
+                            const result = await transport.sendMail(mailOptions);
+                            return result;
+                        } catch (error) {
+                            return error;
+                        }
+                        }
 
-sendMail()
-  .then((result) => console.log('Email sent...', result))
-  .catch((error) => console.log(error.message));
+                        sendMail()
+                        .then((result) => console.log('Email sent...', result))
+                        .catch((error) => console.log(error.message));
 
                 //end mail
                 res.send({write_status: "success",BillId:docs._id});
@@ -296,15 +333,12 @@ UserModel.find({},  (err,result) =>{
      }
 })
 });
-app.post("/get-bill",(req,res)=>{
+app.post("/get-bill",async (req,res)=>{
     bid = req.body.bid;
-    PaymentModel.find({_id:bid},  (err,result) =>{
-        if(err){
-            res.json(err);
-         }else {
-             res.json(result);
-         }
-    })
+    const bill= await PaymentModel.find({_id:bid});
+    const user= await UserModel.find({_id:bill[0].uid});
+       res.json({result:bill,user:user});
+
     });
 app.get("/promocount",(req,res)=>{
     ProductModel.count({promostatus:'active'},  (err,result) =>{
